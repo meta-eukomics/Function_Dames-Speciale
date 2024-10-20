@@ -33,6 +33,7 @@ data_2<- data %>%
 #adding p back to the protein_no column
 data_2$protein_no <- paste0("p", data_2$protein_no)
 
+#determine if there are duplicates
 data_dups_2 <- data_2 %>%
   group_by(contig_name) %>%
   filter(n() > 1) %>%
