@@ -1,0 +1,50 @@
+---
+title: "De-replicating protein annotations_CAG"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+setwd("/work/ocb_2024fall/projects/function/Dames")
+#install.packages("BiocManager")
+#BiocManager::install('tximport')
+library(tximport)
+#library(DESeq2)
+#library(tidyverse)
+library(tidyr)
+library(dplyr)
+library(stringr)
+```
+
+```{r}
+#combined annotations from CAGs
+data<- read.delim("/work/ocb_2024fall/projects/function/Speciale/Combined_Annot/combined_annotations.tsv")
+
+#change column name to match quast.sf file
+colnames(data)[1]<-"Name"
+
+#separate the protein number and contig_name to eventually identify duplicated potential protein assignments  
+data_2<- data %>% 
+  separate(Name, into = c("contig_name", "protein_no"),sep = "\\.p", remove = FALSE)
+
+#adding p back to the protein_no column
+data_2$protein_no <- paste0("p", data_2$protein_no)
+
+data_dups_2 <- data_2 %>%
+  group_by(contig_name) %>%
+  filter(n() > 1) %>%
+  distinct()
+
+#selected only unique contigs/proteins with the lowest e-value
+df_lowest <- data_2 %>%
+  group_by(contig_name) %>%
+  slice_min(evalue)
+
+#export the new annnotation with one protein per contig assigned for alignment
+write.csv(df_lowest, "/work/ocb_2024fall/projects/function/Dames/CAG_unique_annotations.csv")
+
+```
+

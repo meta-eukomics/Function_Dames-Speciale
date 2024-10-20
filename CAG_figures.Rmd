@@ -1,0 +1,201 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(reshape2) 
+
+
+setwd("/Users/ndames/Library/CloudStorage/Dropbox/Postdoc/Worden_Postdoc_2024_2026/MetaEuk")
+```
+
+H
+
+```{r}
+# Sample data: percentages per sample for KO, GO, Pfam, Seed_Ortholog
+
+data <- read.csv("CAG_anon_data.csv", header=T)
+
+data_percent<- data[,c(1:11,14,19:22)]
+
+data_percent_2<-melt(data_percent,id=c("Sample_Name","Concentration",
+                                       "Lab_Code","Method","Sequencing_Center",
+                                       "Bioanalyzer_conc", "Filter","Seq_center",
+                                       "Sequencing_Treatment","RIN","RIN_group"))
+
+
+###Seq_center
+
+seq_center<-ggplot(data_percent_2, aes(x =Sample_Name, y = value, fill = variable)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8)) + 
+  facet_grid(~Seq_center, scales = "free_x", space = "free") +
+ # geom_text(aes(label = paste0(value, "%")),     # Annotate percentages
+            #position = position_stack(vjust = 0.5),   # Center the text
+           # color = "white") +                        # Text color
+  scale_fill_manual(labels = c("reads_mapped_percent" = "Percent mapped",
+                               "KEGG_ko_percent" = "KEGG-KO", 
+                               "GOs_percent" = "GO", 
+                               "PFAMs_percent" = "Pfam", 
+                               "Seed_ortholog_percent" = "Seed_orthology"),
+                    values = c("reads_mapped_percent" = "#A62800",
+                               "KEGG_ko_percent" = "#E69F00", 
+                               "GOs_percent" = "#009E73", 
+                               "PFAMs_percent" = "#56B4E9",
+                               "Seed_ortholog_percent" = "midnightblue")) +
+  labs(x = "Sample", y = "Percentage (%)") +
+  theme(strip.text.x = element_text(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        legend.title = element_blank())
+seq_center
+ggsave(plot=seq_center, "seq_center.pdf",scale=2)
+ggsave(plot=seq_center, "seq_center.jpg",scale=2)
+
+```
+
+```{r}
+###Lab_code
+
+ggplot(data_percent_2, aes(x =Sample_Name, y = value, fill = variable)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8)) + 
+  facet_grid(~Lab_Code, scales = "free_x", space = "free") +
+ # geom_text(aes(label = paste0(value, "%")),     # Annotate percentages
+            #position = position_stack(vjust = 0.5),   # Center the text
+           # color = "white") +                        # Text color
+ scale_fill_manual(labels = c("reads_mapped_percent" = "Percent mapped",
+                               "KEGG_ko_percent" = "KEGG-KO", 
+                               "GOs_percent" = "GO", 
+                               "PFAMs_percent" = "Pfam", 
+                               "Seed_ortholog_percent" = "Seed_orthology"),
+                    values = c("reads_mapped_percent" = "#A62800",
+                               "KEGG_ko_percent" = "#E69F00", 
+                               "GOs_percent" = "#009E73", 
+                               "PFAMs_percent" = "#56B4E9",
+                               "Seed_ortholog_percent" = "midnightblue")) +
+  labs(x = "Sample", y = "Percentage (%)") +
+  theme(strip.text.x = element_text(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        legend.title = element_blank())+
+  scale_y_continuous(expand = c(0, 0))
+
+```
+
+```{r}
+###Method
+ggplot(data_percent_2, aes(x =Sample_Name, y = value, fill = variable)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8)) + 
+  facet_grid(~Method, scales = "free_x", space = "free") +
+ # geom_text(aes(label = paste0(value, "%")),     # Annotate percentages
+            #position = position_stack(vjust = 0.5),   # Center the text
+           # color = "white") +                        # Text color
+ scale_fill_manual(labels = c("reads_mapped_percent" = "Percent mapped",
+                               "KEGG_ko_percent" = "KEGG-KO", 
+                               "GOs_percent" = "GO", 
+                               "PFAMs_percent" = "Pfam", 
+                               "Seed_ortholog_percent" = "Seed_orthology"),
+                    values = c("reads_mapped_percent" = "#A62800",
+                               "KEGG_ko_percent" = "#E69F00", 
+                               "GOs_percent" = "#009E73", 
+                               "PFAMs_percent" = "#56B4E9",
+                               "Seed_ortholog_percent" = "midnightblue")) +
+  labs(x = "Sample", y = "Percentage (%)") +
+  theme(strip.text.x = element_text(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        legend.title = element_blank())+
+  scale_y_continuous(expand = c(0, 0))
+```
+
+```{r}
+###RIN
+ggplot(data_percent_2, aes(x =Sample_Name, y = value, fill = variable)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8)) + 
+  facet_grid(~RIN_group, scales = "free_x", space = "free") +
+ # geom_text(aes(label = paste0(value, "%")),     # Annotate percentages
+            #position = position_stack(vjust = 0.5),   # Center the text
+           # color = "white") +                        # Text color
+  scale_fill_manual(labels = c("KEGG_ko_percent" = "KEGG-ko", "GOs_percent" = "GO", 
+                               "PFAMs_percent" = "Pfam", "Seed_ortholog_percent" = "Seed_orthology"),
+                    values = c("KEGG_ko_percent" = "#E69F00", "GOs_percent" = "#009E73", 
+                               "PFAMs_percent" = "#56B4E9", "Seed_ortholog_percent" = "midnightblue")) +
+  labs(x = "Sample", y = "Percentage", fill = "Category") +
+  theme(strip.text.y = element_text(angle = 0),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+```{r}
+###Sequencing treatment 
+
+ggplot(data_percent_2, aes(x =Sample_Name, y = value, fill = variable)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8)) + 
+  facet_grid(~Sequencing_Treatment, scales = "free_x", space = "free") +
+ # geom_text(aes(label = paste0(value, "%")),     # Annotate percentages
+            #position = position_stack(vjust = 0.5),   # Center the text
+           # color = "white") +                        # Text color
+  scale_fill_manual(labels = c("KEGG_ko_percent" = "KEGG-ko", "GOs_percent" = "GO", 
+                               "PFAMs_percent" = "Pfam", "Seed_ortholog_percent" = "Seed_orthology"),
+                    values = c("KEGG_ko_percent" = "#E69F00", "GOs_percent" = "#009E73", 
+                               "PFAMs_percent" = "#56B4E9", "Seed_ortholog_percent" = "midnightblue")) +
+  labs(x = "Sample", y = "Percentage", fill = "Category") +
+  theme(strip.text.y = element_text(angle = 0),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+```{r}
+###Filter
+ggplot(data_percent_2, aes(x =Sample_Name, y = value, fill = variable)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8)) + 
+  facet_grid(~Filter, scales = "free_x", space = "free") +
+ # geom_text(aes(label = paste0(value, "%")),     # Annotate percentages
+            #position = position_stack(vjust = 0.5),   # Center the text
+           # color = "white") +                        # Text color
+  scale_fill_manual(labels = c("KEGG_ko_percent" = "KEGG-ko", "GOs_percent" = "GO", 
+                               "PFAMs_percent" = "Pfam", "Seed_ortholog_percent" = "Seed_orthology"),
+                    values = c("KEGG_ko_percent" = "#E69F00", "GOs_percent" = "#009E73", 
+                               "PFAMs_percent" = "#56B4E9", "Seed_ortholog_percent" = "midnightblue")) +
+  labs(x = "Sample", y = "Percentage", fill = "Category") +
+  theme(strip.text.y = element_text(angle = 0),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+```{r}
+###Concentration
+ggplot(data_percent_2, aes(x =Sample_Name, y = value, fill = variable)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8)) + 
+  facet_grid(~Concentration, scales = "free_x", space = "free") +
+ # geom_text(aes(label = paste0(value, "%")),     # Annotate percentages
+            #position = position_stack(vjust = 0.5),   # Center the text
+           # color = "white") +                        # Text color
+  scale_fill_manual(labels = c("KEGG_ko_percent" = "KEGG-ko", "GOs_percent" = "GO", 
+                               "PFAMs_percent" = "Pfam", "Seed_ortholog_percent" = "Seed_orthology"),
+                    values = c("KEGG_ko_percent" = "#E69F00", "GOs_percent" = "#009E73", 
+                               "PFAMs_percent" = "#56B4E9", "Seed_ortholog_percent" = "midnightblue")) +
+  labs(x = "Sample", y = "Percentage", fill = "Category") +
+  theme(strip.text.y = element_text(angle = 0),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+```{r}
+###TPM
+
+data_tpm<-data[,c(1:10,23,25,27,29)]
+data_tpm_melt<-melt(data_tpm,id=c("Sample_Name","Concentration",
+                                       "Lab_Code","Method","Sequencing_Center",
+                                       "Bioanalyzer_conc", "Filter",
+                                       "Sequencing_Treatment","RIN","RIN_group"))
+
+ggplot(data_tpm_melt, aes(x =Sample_Name, y = value, fill = variable)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8)) + 
+  #facet_grid(~Concentration, scales = "free_x", space = "free") +
+ # geom_text(aes(label = paste0(value, "%")),     # Annotate percentages
+            #position = position_stack(vjust = 0.5),   # Center the text
+           # color = "white") +                        # Text color
+  #scale_fill_manual(labels = c("KEGG_ko_percent" = "KEGG-ko", "GOs_percent" = "GO", 
+                      #         "PFAMs_percent" = "Pfam", "Seed_ortholog_percent" = #"Seed_orthology"),
+                   # values = c("KEGG_ko_percent" = "#E69F00", "GOs_percent" = #"#009E73", 
+                            #   "PFAMs_percent" = "#56B4E9", "Seed_ortholog_percent" #= "midnightblue")) +
+  labs(x = "Sample", y = "Log2", fill = "Category") +
+  theme(strip.text.y = element_text(angle = 0),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```

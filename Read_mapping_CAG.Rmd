@@ -1,0 +1,80 @@
+---
+title: "Salmon and annoation combination_Function"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+# Set the directory where your CSV files are located
+file_directory <- "/work/ocb_2024fall/projects/function/Speciale/Sample_Function_Data/"
+
+# Get a list of all CSV files with the format HS0**_quant_annot.csv
+csv_files <- list.files(path = file_directory, pattern = "HS0.*_quant_annot.csv", full.names = TRUE)
+
+# Create an empty dataframe to store the results
+results_df <- data.frame(HS_number = character(),
+                         Total_NumReads = numeric(),
+                         KEGG_ko_NumReads = numeric(),
+                         Seed_ortholog_NumReads = numeric(),
+                         PFAMs_NumReads = numeric(),
+                         GOs_NumReads = numeric(),
+                         KEGG_ko_percent = numeric(),
+                         Seed_ortholog_percent = numeric(),
+                         PFAMs_percent = numeric(),
+                         GOs_percent = numeric(),
+                         stringsAsFactors = FALSE)
+
+
+
+# Loop through each file
+for (file in csv_files) {
+  # Read the CSV file
+  data <- read.csv(file)
+  
+  #Relabel all "-" to NA
+  data <- data %>% mutate_all(~ifelse(. == "-", NA, .))
+
+  # Get the HS number from the filename
+  hs_number <- sub("_quant_annot.csv", "", basename(file))
+
+  # Calculate total NumReads
+  total_numreads <- sum(data$NumReads, na.rm = TRUE)
+
+  # Calculate the sum of NumReads based on each column condition
+  seed_ortholog_numreads <- sum(data$NumReads[!is.na(data$seed_ortholog)], na.rm = TRUE)
+  kegg_ko_numreads <- sum(data$NumReads[!is.na(data$KEGG_ko)], na.rm = TRUE)
+  pfams_numreads <- sum(data$NumReads[!is.na(data$PFAMs)], na.rm = TRUE)
+  gos_numreads <- sum(data$NumReads[!is.na(data$GOs)], na.rm = TRUE)
+
+  # Calculate the percentages
+  seed_ortholog_percent <- (seed_ortholog_numreads/total_numreads) * 100
+  kegg_ko_percent <- (kegg_ko_numreads / total_numreads) * 100
+  pfams_percent <- (pfams_numreads / total_numreads) * 100
+  gos_percent <- (gos_numreads / total_numreads) * 100
+
+  # Append the results to the results dataframe
+  results_df <- rbind(results_df, data.frame(HS_number = hs_number,
+                                             Total_NumReads = total_numreads,
+                                             Seed_ortholog_NumReads = seed_ortholog_numreads,
+                                             KEGG_ko_NumReads = kegg_ko_numreads,
+                                             PFAMs_NumReads = pfams_numreads,
+                                             GOs_NumReads = gos_numreads,
+                                             KEGG_ko_percent = kegg_ko_percent,
+                                             Seed_ortholog_percent = seed_ortholog_percent,
+                                             PFAMs_percent = pfams_percent,
+                                             GOs_percent = gos_percent))
+}
+
+# View the results
+print(results_df)
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
